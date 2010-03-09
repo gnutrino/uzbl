@@ -537,6 +537,10 @@ button_press_cb (GtkWidget* window, GdkEventButton* event) {
             sendev    = TRUE;
             propagate = TRUE;
         }
+		else if(event->button == 3) {
+			sendev    = TRUE;
+			propagate = FALSE;
+		}
 
         if(sendev) {
             details = g_strdup_printf("Button%d", event->button);
