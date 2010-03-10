@@ -27,46 +27,45 @@
 
 extern UzblCore uzbl;
 
-extern gchar* expand(char*, guint);
 extern void make_var_to_name_hash(void);
 
 void
 test_keycmd (void) {
     uzbl.state.keycmd = "gg winslow";
-    g_assert_cmpstr(expand("@keycmd", 0), ==, "gg winslow");
+    g_assert_cmpstr(expand("@keycmd"), ==, "gg winslow");
 }
 
 void
 test_uri (void) {
-    g_assert_cmpstr(expand("@uri", 0), ==, "");
+    g_assert_cmpstr(expand("@uri"), ==, "");
 
     uzbl.state.uri = g_strdup("http://www.uzbl.org/");
-    g_assert_cmpstr(expand("@uri", 0), ==, uzbl.state.uri);
+    g_assert_cmpstr(expand("@uri"), ==, uzbl.state.uri);
     g_free(uzbl.state.uri);
 }
 
 void
 test_TITLE (void) {
     uzbl.gui.main_title = "Lorem Ipsum";
-    g_assert_cmpstr(expand("@TITLE", 0), ==, "Lorem Ipsum");
+    g_assert_cmpstr(expand("@TITLE"), ==, "Lorem Ipsum");
 }
 
 void
 test_SELECTED_URI (void) {
     uzbl.state.selected_url = "http://example.org/";
-    g_assert_cmpstr(expand("@SELECTED_URI", 0), ==, "http://example.org/");
+    g_assert_cmpstr(expand("@SELECTED_URI"), ==, "http://example.org/");
 }
 
 void
 test_NAME (void) {
     uzbl.state.instance_name = "testing";
-    g_assert_cmpstr(expand("@NAME", 0), ==, "testing");
+    g_assert_cmpstr(expand("@NAME"), ==, "testing");
 }
 
 void
 test_useragent (void) {
     uzbl.net.useragent = "This is the uzbl browser (sort of).  and btw: Hello from frosty Edmonton!";
-    g_assert_cmpstr(expand("@useragent", 0), ==, "This is the uzbl browser (sort of).  and btw: Hello from frosty Edmonton!");
+    g_assert_cmpstr(expand("@useragent"), ==, "This is the uzbl browser (sort of).  and btw: Hello from frosty Edmonton!");
 }
 
 void
@@ -78,17 +77,17 @@ test_WEBKIT_VERSION (void) {
     g_string_append(expected, " ");
     g_string_append(expected, itos(webkit_micro_version()));
 
-    g_assert_cmpstr(expand("@WEBKIT_MAJOR @WEBKIT_MINOR @WEBKIT_MICRO", 0), ==, g_string_free(expected, FALSE));
+    g_assert_cmpstr(expand("@WEBKIT_MAJOR @WEBKIT_MINOR @WEBKIT_MICRO"), ==, g_string_free(expected, FALSE));
 }
 
 void
 test_ARCH_UZBL (void) {
-    g_assert_cmpstr(expand("@ARCH_UZBL", 0), ==, ARCH);
+    g_assert_cmpstr(expand("@ARCH_UZBL"), ==, ARCH);
 }
 
 void
 test_COMMIT (void) {
-    g_assert_cmpstr(expand("@COMMIT", 0), ==, uzbl.info.commit);
+    g_assert_cmpstr(expand("@COMMIT"), ==, uzbl.info.commit);
 }
 
 void
@@ -101,7 +100,7 @@ test_cmd_useragent_simple (void) {
     g_string_append(expected, itos(WEBKIT_MICRO_VERSION));
     g_string_append(expected, ")");
 
-    g_assert_cmpstr(expand("Uzbl (Webkit @WEBKIT_MAJOR.@WEBKIT_MINOR.@WEBKIT_MICRO)", 0), ==, g_string_free(expected, FALSE));
+    g_assert_cmpstr(expand("Uzbl (Webkit @WEBKIT_MAJOR.@WEBKIT_MINOR.@WEBKIT_MICRO)"), ==, g_string_free(expected, FALSE));
 }
 
 void
@@ -133,23 +132,23 @@ test_cmd_useragent_full (void) {
     g_string_append(expected, uzbl.info.commit);
     g_string_append(expected, ")");
 
-    g_assert_cmpstr(expand("Uzbl (Webkit @WEBKIT_MAJOR.@WEBKIT_MINOR.@WEBKIT_MICRO) (@(uname -s)@ @(uname -n)@ @(uname -r)@ @(uname -v)@ @(uname -m)@ [@ARCH_UZBL]) (Commit @COMMIT)", 0), ==, g_string_free(expected, FALSE));
+    g_assert_cmpstr(expand("Uzbl (Webkit @WEBKIT_MAJOR.@WEBKIT_MINOR.@WEBKIT_MICRO) (@(uname -s)@ @(uname -n)@ @(uname -r)@ @(uname -v)@ @(uname -m)@ [@ARCH_UZBL]) (Commit @COMMIT)"), ==, g_string_free(expected, FALSE));
 }
 
 void
 test_escape_markup (void) {
     /* simple expansion */
     uzbl.state.uri = g_strdup("<&>");
-    g_assert_cmpstr(expand("@uri", 0), ==, uzbl.state.uri);
-    g_assert_cmpstr(expand("@[@uri]@", 0), ==, "&lt;&amp;&gt;");
+    g_assert_cmpstr(expand("@uri"), ==, uzbl.state.uri);
+    g_assert_cmpstr(expand("@[@uri]@"), ==, "&lt;&amp;&gt;");
 
     /* shell expansion */
-    g_assert_cmpstr(expand("@(echo -n '<&>')@", 0), ==, "<&>");
-    g_assert_cmpstr(expand("@[@(echo -n '<&>')@]@", 0), ==, "&lt;&amp;&gt;");
+    g_assert_cmpstr(expand("@(echo -n '<&>')@"), ==, "<&>");
+    g_assert_cmpstr(expand("@[@(echo -n '<&>')@]@"), ==, "&lt;&amp;&gt;");
 
     /* javascript expansion */
-    g_assert_cmpstr(expand("@<'<&>'>@", 0), ==, "<&>");
-    g_assert_cmpstr(expand("@[@<'<&>'>@]@", 0), ==, "&lt;&amp;&gt;");
+    g_assert_cmpstr(expand("@<'<&>'>@"), ==, "<&>");
+    g_assert_cmpstr(expand("@[@<'<&>'>@]@"), ==, "&lt;&amp;&gt;");
 
     g_free(uzbl.state.uri);
 }
@@ -157,26 +156,26 @@ test_escape_markup (void) {
 void
 test_escape_expansion (void) {
     /* \@ -> @ */
-    g_assert_cmpstr(expand("\\@uri", 0), ==, "@uri");
+    g_assert_cmpstr(expand("\\@uri"), ==, "@uri");
 
     /* \\\@ -> \@ */
-    g_assert_cmpstr(expand("\\\\\\@uri", 0), ==, "\\@uri");
+    g_assert_cmpstr(expand("\\\\\\@uri"), ==, "\\@uri");
 
     /* \@(...)\@ -> @(...)@ */
-    g_assert_cmpstr(expand("\\@(echo hi)\\@", 0), ==, "@(echo hi)@");
+    g_assert_cmpstr(expand("\\@(echo hi)\\@"), ==, "@(echo hi)@");
 
     /* \@<...>\@ -> @<...>@ */
-    g_assert_cmpstr(expand("\\@<\"hi\">\\@", 0), ==, "@<\"hi\">@");
+    g_assert_cmpstr(expand("\\@<\"hi\">\\@"), ==, "@<\"hi\">@");
 }
 
 void
 test_nested (void) {
     uzbl.net.useragent = "xxx";
-    g_assert_cmpstr(expand("@<\"..@useragent..\">@", 0), ==, "..xxx..");
-    g_assert_cmpstr(expand("@<\"..\\@useragent..\">@", 0), ==, "..@useragent..");
+    g_assert_cmpstr(expand("@<\"..@useragent..\">@"), ==, "..xxx..");
+    g_assert_cmpstr(expand("@<\"..\\@useragent..\">@"), ==, "..@useragent..");
 
-    g_assert_cmpstr(expand("@(echo ..@useragent..)@", 0), ==, "..xxx..");
-    g_assert_cmpstr(expand("@(echo ..\\@useragent..)@", 0), ==, "..@useragent..");
+    g_assert_cmpstr(expand("@(echo ..@useragent..)@"), ==, "..xxx..");
+    g_assert_cmpstr(expand("@(echo ..\\@useragent..)@"), ==, "..@useragent..");
 }
 
 int

@@ -226,8 +226,14 @@ typedef struct {
 } uzbl_cmdprop;
 
 /* Functions */
+gchar *
+expand(const char *str);
+
 char *
 itos(int val);
+
+char *
+ftos(float val);
 
 char *
 str_replace (const char* search, const char* replace, const char* string);

@@ -1,5 +1,9 @@
 uzbl-core
+test-expand
+test-command
 *.o
+*.so
 *.pyc
+*.swp
 *~
 tags

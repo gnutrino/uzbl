@@ -438,6 +438,18 @@ them:
 
     print At sign: \@  and backslash: \\
 
+NOTE2: Nested substitutions may not work as expected at the moment. Variable
+substitutions can be safely put inside other substitutions (as shown above)
+which is likely to cover the most common uses. However the following will fail:
+	
+	print @(echo 'Attempting to nest commands: @(date)@ <- if this worked the date will be there')@
+
+will print
+
+	<- if this worked the date will be there')
+
+this may be fixed at some point
+
 ### TITLE AND STATUS BAR EVALUATION
 
 The contents of the status bar can be customized by setting the `status_format`
