@@ -90,7 +90,6 @@ const struct var_name_to_ptr_t {
     { "print_events",           PTR_V_INT(uzbl.state.events_stdout,             1,   NULL)},
     { "inject_html",            PTR_V_STR(uzbl.behave.inject_html,              0,   cmd_inject_html)},
     { "geometry",               PTR_V_STR(uzbl.gui.geometry,                    1,   cmd_set_geometry)},
-    { "keycmd",                 PTR_V_STR(uzbl.state.keycmd,                    1,   NULL)},
     { "show_status",            PTR_V_INT(uzbl.behave.show_status,              1,   cmd_set_status)},
     { "status_top",             PTR_V_INT(uzbl.behave.status_top,               1,   move_statusbar)},
     { "status_format",          PTR_V_STR(uzbl.behave.status_format,            1,   NULL)},
@@ -99,7 +98,6 @@ const struct var_name_to_ptr_t {
     { "title_format_short",     PTR_V_STR(uzbl.behave.title_format_short,       1,   NULL)},
     { "icon",                   PTR_V_STR(uzbl.gui.icon,                        1,   set_icon)},
     { "forward_keys",           PTR_V_INT(uzbl.behave.forward_keys,             1,   NULL)},
-    { "download_handler",       PTR_V_STR(uzbl.behave.download_handler,         1,   NULL)},
     { "cookie_handler",         PTR_V_STR(uzbl.behave.cookie_handler,           1,   NULL)},
     { "authentication_handler", PTR_V_STR(uzbl.behave.authentication_handler,   1,   set_authentication_handler)},
     { "new_window",             PTR_V_STR(uzbl.behave.new_window,               1,   NULL)},
@@ -502,7 +500,10 @@ clean_up(void) {
     g_free(uzbl.info.pid_str);
 
     g_free(uzbl.state.executable_path);
-    g_hash_table_destroy(uzbl.behave.commands);
+    if (uzbl.behave.commands) {
+        g_hash_table_destroy(uzbl.behave.commands);
+        uzbl.behave.commands = NULL;
+    }
 
     if(uzbl.state.event_buffer)
         g_ptr_array_free(uzbl.state.event_buffer, TRUE);
@@ -1084,9 +1085,9 @@ eval_js(WebKitWebView * web_view, gchar *script, GString *result, const char *fi
         size_t size;
         JSStringRef prop, val;
         JSObjectRef exc = JSValueToObject(context, js_exc, NULL);
-        
+
         printf("Exception occured while executing script:\n");
-        
+
         /* Print file */
         prop = JSStringCreateWithUTF8CString("sourceURL");
         val = JSValueToStringCopy(context, JSObjectGetProperty(context, exc, prop, NULL), NULL);
@@ -1110,7 +1111,7 @@ eval_js(WebKitWebView * web_view, gchar *script, GString *result, const char *fi
         }
         JSStringRelease(prop);
         JSStringRelease(val);
-        
+
         /* Print message */
         val = JSValueToStringCopy(context, exc, NULL);
         size = JSStringGetMaximumUTF8CStringSize(val);
@@ -2533,7 +2534,6 @@ initialize(int argc, char *argv[]) {
     }
 
     uzbl.net.soup_session = webkit_get_default_session();
-    uzbl.state.keycmd = g_strdup("");
 
     for(i=0; sigs[i]; i++) {
         if(setup_signal(sigs[i], catch_signal) == SIG_ERR)
