@@ -48,7 +48,7 @@ set authentication_handler = sync_spawn @scripts_dir/auth.py
 # Open in the same window.
 #set new_window         = sh 'echo uri "$8" > $4'
 # Open a link in a new window. equivalent to default behavior
-set new_window          = sh 'uzbl-browser -u $8'
+set new_window          = sh 'uzbl-browser -u "$8"'
 
 # --- Optional dynamic event handlers ----------------------------------------
 
@@ -158,7 +158,9 @@ set ebind = @mode_bind global,-insert
 # === Global & keycmd editing binds ==========================================
 
 # Resets keycmd and returns to default mode.
-@bind   <Escape>     = @set_mode
+@on_event  ESCAPE    @set_mode
+@bind   <Escape>     = event ESCAPE
+@bind   <Ctrl>]      = event ESCAPE
 
 # Commands for editing and traversing the keycmd.
 @ebind  <Return>     = event KEYCMD_EXEC_CURRENT
@@ -266,8 +268,9 @@ set preset = event PRESET_TABS
 @cbind  ZZ                 = exit
 # Dump config to stdout
 @cbind  !dump              = sh "echo dump_config > $4"
-# Reload config
-@cbind  !reload            = sh "sed '/^# === Post-load misc commands/,$d' $1 > $4"
+# Reload all variables in the config
+@cbind  !reload            = sh "sed '/^# === Post-load misc commands/,$d' $1 | grep '^set ' > $4"
+
 # Use socat to directly inject commands into uzbl-core and view events
 # raised by uzbl-core:
 @cbind  <Ctrl><Alt>t  = sh 'xterm -e "socat unix-connect:$5 -"'
